@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fertilizer Application Rate Calculator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #2d5016 0%, #4a7c2c 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.95;
+            margin-bottom: 5px;
+        }
+
+        .header .subtitle {
+            font-size: 0.95em;
+            opacity: 0.85;
+        }
+
+        .calculator-card {
+            background: white;
+            border-radius: 12px;
+            padding: 35px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            margin-bottom: 20px;
+        }
+
+        .step-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #4a7c2c;
+        }
+
+        .step-number {
+            background: #4a7c2c;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3em;
+            font-weight: bold;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+
+        .step-header h2 {
+            color: #2d5016;
+            font-size: 1.5em;
+            margin: 0;
+        }
+
+        .input-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+            font-size: 1.05em;
+        }
+
+        .input-group .helper-text {
+            font-size: 0.85em;
+            color: #666;
+            margin-top: 5px;
+            font-weight: normal;
+        }
+
+        .input-group input, .input-group select {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 18px;
+            transition: all 0.3s;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .input-group input:focus, .input-group select:focus {
+            outline: none;
+            border-color: #4a7c2c;
+            box-shadow: 0 0 0 3px rgba(74, 124, 44, 0.1);
+        }
+
+        .unit-toggle {
+            display: flex;
+            gap: 10px;
+            margin-top: 8px;
+        }
+
+        .unit-toggle button {
+            flex: 1;
+            padding: 8px;
+            border: 2px solid #ddd;
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.2s;
+        }
+
+        .unit-toggle button.active {
+            background: #4a7c2c;
+            color: white;
+            border-color: #4a7c2c;
+        }
+
+        .unit-toggle button:hover:not(.active) {
+            border-color: #4a7c2c;
+        }
+
+        .results-section {
+            background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+            padding: 30px;
+            border-radius: 10px;
+            border: 3px solid #4a7c2c;
+            margin-top: 30px;
+        }
+
+        .results-section h3 {
+            color: #2d5016;
+            margin-bottom: 20px;
+            font-size: 1.4em;
+            text-align: center;
+        }
+
+        .result-highlight {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .result-highlight .label {
+            color: #666;
+            font-size: 1em;
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+
+        .result-highlight .value {
+            color: #2d5016;
+            font-size: 2.5em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .result-highlight .unit {
+            color: #4a7c2c;
+            font-size: 1.1em;
+            font-weight: 600;
+        }
+
+        .result-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        .result-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .result-item .label {
+            color: #666;
+            font-size: 0.9em;
+            margin-bottom: 8px;
+        }
+
+        .result-item .value {
+            color: #2d5016;
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+
+        .info-box {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 20px;
+            margin: 25px 0;
+            border-radius: 6px;
+        }
+
+        .info-box h4 {
+            color: #856404;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+
+        .info-box p {
+            color: #856404;
+            line-height: 1.6;
+            margin-bottom: 8px;
+        }
+
+        .info-box ul {
+            margin-left: 20px;
+            color: #856404;
+            line-height: 1.8;
+        }
+
+        .help-section {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            margin-top: 20px;
+        }
+
+        .help-section h3 {
+            color: #2d5016;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .help-section p {
+            color: #666;
+            line-height: 1.8;
+            margin-bottom: 15px;
+        }
+
+        .help-section ul {
+            margin-left: 20px;
+            color: #666;
+            line-height: 1.8;
+        }
+
+        .example-card {
+            background: #f8f9fa;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 15px;
+        }
+
+        .example-card strong {
+            color: #2d5016;
+        }
+
+        @media (max-width: 768px) {
+            .input-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .result-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header h1 {
+                font-size: 1.8em;
+            }
+            
+            .calculator-card, .help-section {
+                padding: 20px;
+            }
+
+            .result-highlight .value {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🌱 Garden Fertilizer Calculator</h1>
+            <p>Turn your soil test results into easy measurements</p>
+            <p class="subtitle">Perfect for home gardeners with beds from 10-200 sq ft</p>
+        </div>
+
+        <!-- Main Calculator -->
+        <div class="calculator-card">
+            <!-- Step 1 -->
+            <div class="step-header">
+                <div class="step-number">1</div>
+                <h2>Your Soil Test Recommendation</h2>
+            </div>
+
+            <div class="input-row">
+                <div class="input-group">
+                    <label>Application Rate</label>
+                    <input type="number" id="appRate" value="1.5" step="0.01" min="0">
+                    <div class="unit-toggle">
+                        <button class="active" onclick="setUnit('per1000')">lbs per 1000 ft²</button>
+                        <button onclick="setUnit('perAcre')">lbs per Acre</button>
+                    </div>
+                    <div class="helper-text">From your soil test report</div>
+                </div>
+
+                <div class="input-group">
+                    <label>Nutrient Type</label>
+                    <select id="nutrientType">
+                        <option value="N">Nitrogen (N)</option>
+                        <option value="P">Phosphorus (P)</option>
+                        <option value="K">Potassium (K)</option>
+                        <option value="S">Sulfur (S)</option>
+                        <option value="B">Boron (B)</option>
+                        <option value="Other">Other</option>
+                    </select>
+                    <div class="helper-text">Which nutrient are you applying?</div>
+                </div>
+            </div>
+
+            <!-- Step 2 -->
+            <div class="step-header">
+                <div class="step-number">2</div>
+                <h2>Your Fertilizer Product</h2>
+            </div>
+
+            <div class="input-row">
+                <div class="input-group">
+                    <label>Fertilizer Percentage</label>
+                    <input type="number" id="fertilizerPct" value="21" step="0.1" min="0" max="100">
+                    <div class="helper-text">% of nutrient in your fertilizer (e.g., 21-0-0 = 21%)</div>
+                </div>
+
+                <div class="input-group">
+                    <label>Product Name (optional)</label>
+                    <select id="commonProducts" onchange="setCommonProduct()">
+                        <option value="">-- Select common fertilizer --</option>
+                        <option value="21">Ammonium Sulfate (21% N)</option>
+                        <option value="13">Blood Meal (13% N)</option>
+                        <option value="46">Urea (46% N)</option>
+                        <option value="15">Bone Meal (15% P)</option>
+                        <option value="10">Feather Meal (10% N)</option>
+                        <option value="5">Fish Emulsion (5% N)</option>
+                        <option value="0">Enter manually</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Step 3 -->
+            <div class="step-header">
+                <div class="step-number">3</div>
+                <h2>Your Garden Bed Size</h2>
+            </div>
+
+            <div class="input-row">
+                <div class="input-group">
+                    <label>Bed Area (square feet)</label>
+                    <input type="number" id="bedSize" value="40" step="1" min="0">
+                    <div class="helper-text">Length × Width in feet</div>
+                </div>
+
+                <div class="input-group">
+                    <label>Quick Calculate</label>
+                    <div style="display: flex; gap: 10px; margin-top: 8px;">
+                        <input type="number" id="bedLength" placeholder="Length (ft)" style="flex: 1;" step="0.5">
+                        <span style="display: flex; align-items: center; font-size: 1.2em; color: #666;">×</span>
+                        <input type="number" id="bedWidth" placeholder="Width (ft)" style="flex: 1;" step="0.5">
+                    </div>
+                    <div class="helper-text">Enter dimensions to auto-calculate area</div>
+                </div>
+            </div>
+
+            <!-- Results -->
+            <div class="results-section">
+                <h3>📊 How Much To Apply</h3>
+
+                <div class="result-highlight">
+                    <div class="label">Apply to Your Entire <span id="bedSizeDisplay">40</span> sq ft Bed:</div>
+                    <div class="value" id="mainResult">0</div>
+                    <div class="unit" id="mainUnit">cups</div>
+                </div>
+
+                <div class="result-grid">
+                    <div class="result-item">
+                        <div class="label">Per Square Foot</div>
+                        <div class="value" id="perSqFt">0</div>
+                    </div>
+                    <div class="result-item">
+                        <div class="label">Total Ounces</div>
+                        <div class="value" id="totalOunces">0</div>
+                    </div>
+                    <div class="result-item">
+                        <div class="label">Total Tablespoons</div>
+                        <div class="value" id="totalTablespoons">0</div>
+                    </div>
+                    <div class="result-item">
+                        <div class="label">Total Pounds</div>
+                        <div class="value" id="totalPounds">0</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-box">
+                <h4>💡 Pro Tips</h4>
+                <ul>
+                    <li><strong>Measuring cups work great</strong> for amounts under 4 cups</li>
+                    <li><strong>Use a kitchen scale</strong> for amounts over 1 pound</li>
+                    <li><strong>Apply evenly</strong> by dividing your bed into sections</li>
+                    <li><strong>Water after application</strong> to help nutrients reach roots</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Help Section -->
+        <div class="help-section">
+            <h3>📖 How to Read Your Soil Test</h3>
+            <p>Your soil test will recommend application rates like "Apply 1.5 lbs/1000 ft² Nitrogen". Here's what to do:</p>
+            
+            <div class="example-card">
+                <p><strong>Example Scenario:</strong></p>
+                <p>✓ Soil test says: "Apply 1.5 lbs/1000 ft² Nitrogen"<br>
+                ✓ You have: Blood meal fertilizer (13-0-0)<br>
+                ✓ Garden bed: 4 ft × 10 ft = 40 sq ft</p>
+                <br>
+                <p><strong>Enter in calculator:</strong></p>
+                <p>• Application Rate: <strong>1.5</strong> (lbs per 1000 ft²)<br>
+                • Fertilizer %: <strong>13</strong> (from the 13-0-0 rating)<br>
+                • Bed Size: <strong>40</strong> sq ft</p>
+                <br>
+                <p>✅ Result: Apply <strong>approximately 1 cup</strong> of blood meal to your 40 sq ft bed!</p>
+            </div>
+
+            <h3>🔢 Understanding Fertilizer Numbers</h3>
+            <p>Fertilizer bags show three numbers like <strong>21-0-0</strong> or <strong>10-10-10</strong>:</p>
+            <ul>
+                <li><strong>First number</strong> = Nitrogen (N) percentage</li>
+                <li><strong>Second number</strong> = Phosphorus (P) percentage</li>
+                <li><strong>Third number</strong> = Potassium (K) percentage</li>
+            </ul>
+            <p>Example: 21-0-0 means 21% Nitrogen. If applying nitrogen, enter <strong>21</strong> in the Fertilizer % field.</p>
+
+            <h3>🌾 Common Organic vs Synthetic Options</h3>
+            <p><strong>For Nitrogen:</strong></p>
+            <ul>
+                <li>Organic: Blood meal (13%), Feather meal (10%), Fish emulsion (5%)</li>
+                <li>Synthetic: Ammonium sulfate (21%), Urea (46%)</li>
+            </ul>
+            <p><strong>For Phosphorus:</strong></p>
+            <ul>
+                <li>Organic: Bone meal (15%), Rock phosphate (3%)</li>
+                <li>Synthetic: Triple superphosphate (45%)</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        let currentUnit = 'per1000';
+
+        function setUnit(unit) {
+            currentUnit = unit;
+            document.querySelectorAll('.unit-toggle button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            calculate();
+        }
+
+        function setCommonProduct() {
+            const select = document.getElementById('commonProducts');
+            const value = select.value;
+            if (value && value !== '0') {
+                document.getElementById('fertilizerPct').value = value;
+                calculate();
+            }
+        }
+
+        function calculate() {
+            let appRate = parseFloat(document.getElementById('appRate').value) || 0;
+            const fertilizerPct = parseFloat(document.getElementById('fertilizerPct').value) || 0;
+            const bedSize = parseFloat(document.getElementById('bedSize').value) || 0;
+
+            if (fertilizerPct === 0) {
+                showError("Please enter fertilizer percentage");
+                return;
+            }
+
+            // Convert per acre to per 1000 sq ft if needed
+            if (currentUnit === 'perAcre') {
+                appRate = appRate / 43.56; // 1 acre = 43,560 sq ft
+            }
+
+            // Update bed size display
+            document.getElementById('bedSizeDisplay').textContent = bedSize;
+
+            // Calculate ounces per sq ft at 100%
+            const poundsPerSqFt = appRate / 1000;
+            const ouncesPerSqFt100 = poundsPerSqFt * 16;
+
+            // Adjust for actual fertilizer percentage
+            const ouncesPerSqFt = ouncesPerSqFt100 * (100 / fertilizerPct);
+
+            // Calculate total for the bed
+            const totalOunces = ouncesPerSqFt * bedSize;
+            const totalPounds = totalOunces / 16;
+            const totalCups = totalOunces / 8;
+            const totalTablespoons = ouncesPerSqFt * bedSize * 2;
+
+            // Display per sq ft
+            if (ouncesPerSqFt < 1) {
+                const tablespoons = ouncesPerSqFt * 2;
+                document.getElementById('perSqFt').textContent = tablespoons.toFixed(1) + ' tbsp';
+            } else {
+                document.getElementById('perSqFt').textContent = ouncesPerSqFt.toFixed(2) + ' oz';
+            }
+
+            // Display totals
+            document.getElementById('totalOunces').textContent = totalOunces.toFixed(1) + ' oz';
+            document.getElementById('totalTablespoons').textContent = Math.round(totalTablespoons) + ' tbsp';
+            document.getElementById('totalPounds').textContent = totalPounds.toFixed(2) + ' lbs';
+
+            // Choose best main display unit
+            let mainValue, mainUnit;
+            if (totalCups < 0.25) {
+                mainValue = (totalTablespoons).toFixed(1);
+                mainUnit = totalTablespoons === 1 ? 'tablespoon' : 'tablespoons';
+            } else if (totalCups < 1) {
+                mainValue = (totalOunces).toFixed(1);
+                mainUnit = 'ounces';
+            } else if (totalCups < 16) {
+                mainValue = totalCups.toFixed(2);
+                mainUnit = totalCups === 1 ? 'cup' : 'cups';
+            } else {
+                mainValue = totalPounds.toFixed(1);
+                mainUnit = totalPounds === 1 ? 'pound' : 'pounds';
+            }
+
+            document.getElementById('mainResult').textContent = mainValue;
+            document.getElementById('mainUnit').textContent = mainUnit;
+        }
+
+        function showError(message) {
+            document.getElementById('mainResult').textContent = '⚠️';
+            document.getElementById('mainUnit').textContent = message;
+        }
+
+        function calculateBedSize() {
+            const length = parseFloat(document.getElementById('bedLength').value) || 0;
+            const width = parseFloat(document.getElementById('bedWidth').value) || 0;
+            if (length > 0 && width > 0) {
+                document.getElementById('bedSize').value = length * width;
+                calculate();
+            }
+        }
+
+        // Event listeners
+        document.getElementById('appRate').addEventListener('input', calculate);
+        document.getElementById('fertilizerPct').addEventListener('input', calculate);
+        document.getElementById('bedSize').addEventListener('input', calculate);
+        document.getElementById('bedLength').addEventListener('input', calculateBedSize);
+        document.getElementById('bedWidth').addEventListener('input', calculateBedSize);
+
+        // Initial calculation
+        calculate();
+    </script>
+</body>
+</html>
