@@ -21,7 +21,7 @@ Perfect for home gardeners with beds ranging from 10-200 square feet who want to
 ## 🚀 How to Use
 
 ### Online (Recommended)
-Visit: **[https://Fertilizer-Calculator.github.io/fertilizer-calculator/](https://YOUR-USERNAME.github.io/fertilizer-calculator/)**
+Visit: **[https://fertilizer-calculator.github.io/Fertilizer-Calculator/]**
 
 ### Offline
 1. Download `index.html`
