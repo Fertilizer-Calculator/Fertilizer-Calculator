@@ -196,9 +196,16 @@
             font-weight: 600;
         }
 
+        .result-highlight .subtext {
+            color: #888;
+            font-size: 0.9em;
+            margin-top: 10px;
+            font-style: italic;
+        }
+
         .result-grid {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
+            grid-template-columns: repeat(3, 1fr);
             gap: 15px;
         }
 
@@ -217,7 +224,7 @@
 
         .result-item .value {
             color: #2d5016;
-            font-size: 1.5em;
+            font-size: 1.3em;
             font-weight: bold;
         }
 
@@ -245,6 +252,20 @@
             margin-left: 20px;
             color: #856404;
             line-height: 1.8;
+        }
+
+        .warning-box {
+            background: #ffe8e8;
+            border-left: 4px solid #d32f2f;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 6px;
+        }
+
+        .warning-box p {
+            color: #c62828;
+            line-height: 1.6;
+            margin: 0;
         }
 
         .help-section {
@@ -313,7 +334,7 @@
         <div class="header">
             <h1>🌱 Garden Fertilizer Calculator</h1>
             <p>Turn your soil test results into easy measurements</p>
-            <p class="subtitle">Perfect for home gardeners with beds from 10-200 sq ft</p>
+            <p class="subtitle">With accurate bulk density calculations for precise applications</p>
         </div>
 
         <!-- Main Calculator -->
@@ -336,14 +357,14 @@
                 </div>
 
                 <div class="input-group">
-                    <label>Nutrient Type (optional)</label>
-                    <select id="nutrientType">
+                    <label>Nutrient Type</label>
+                    <select id="nutrientType" onchange="filterFertilizers()">
+                        <option value="all">All Nutrients</option>
                         <option value="N">Nitrogen (N)</option>
                         <option value="P">Phosphorus (P)</option>
                         <option value="K">Potassium (K)</option>
                         <option value="S">Sulfur (S)</option>
                         <option value="B">Boron (B)</option>
-                        <option value="Other">Other</option>
                     </select>
                     <div class="helper-text">Which nutrient are you applying?</div>
                 </div>
@@ -357,23 +378,17 @@
 
             <div class="input-row">
                 <div class="input-group">
-                    <label>Fertilizer Percentage</label>
-                    <input type="number" id="fertilizerPct" value="21" step="0.1" min="0" max="100">
-                    <div class="helper-text">% of nutrient in your fertilizer (e.g., 21-0-0 = 21%)</div>
+                    <label>Select Fertilizer</label>
+                    <select id="fertilizerSelect" onchange="selectFertilizer()">
+                        <option value="">-- Select a fertilizer --</option>
+                    </select>
+                    <div class="helper-text">Choose from common products (organized by type)</div>
                 </div>
 
                 <div class="input-group">
-                    <label>Product Name (optional)</label>
-                    <select id="commonProducts" onchange="setCommonProduct()">
-                        <option value="">-- Select common fertilizer --</option>
-                        <option value="21">Ammonium Sulfate (21% N)</option>
-                        <option value="13">Blood Meal (13% N)</option>
-                        <option value="46">Urea (46% N)</option>
-                        <option value="15">Bone Meal (15% P)</option>
-                        <option value="10">Feather Meal (10% N)</option>
-                        <option value="5">Fish Emulsion (5% N)</option>
-                        <option value="0">Enter manually</option>
-                    </select>
+                    <label>Or Enter Custom %</label>
+                    <input type="number" id="fertilizerPct" value="" step="0.1" min="0" max="100" placeholder="Enter %">
+                    <div class="helper-text">Override with custom percentage if needed</div>
                 </div>
             </div>
 
@@ -406,37 +421,50 @@
                 <h3>📊 How Much To Apply</h3>
 
                 <div class="result-highlight">
-                    <div class="label">Apply to Your Entire <span id="bedSizeDisplay">40</span> sq ft Bed:</div>
-                    <div class="value" id="mainResult">0</div>
-                    <div class="unit" id="mainUnit">cups</div>
+                    <div class="label">Total Weight Needed for <span id="bedSizeDisplay">40</span> sq ft Bed:</div>
+                    <div class="value" id="mainResultWeight">0</div>
+                    <div class="unit" id="mainUnitWeight">pounds</div>
+                    <div class="subtext" id="volumeEstimate">≈ 0 cups (approximate volume)</div>
                 </div>
 
                 <div class="result-grid">
                     <div class="result-item">
                         <div class="label">Per Square Foot</div>
-                        <div class="value" id="perSqFt">0</div>
+                        <div class="value" id="perSqFtRate">0 oz/sq ft</div>
+                    </div>
+                    <div class="result-item">
+                        <div class="label">Weight per sq ft</div>
+                        <div class="value" id="perSqFtWeight">0 oz</div>
                     </div>
                     <div class="result-item">
                         <div class="label">Total Ounces</div>
-                        <div class="value" id="totalOunces">0</div>
-                    </div>
-                    <div class="result-item">
-                        <div class="label">Total Tablespoons</div>
-                        <div class="value" id="totalTablespoons">0</div>
+                        <div class="value" id="totalOunces">0 oz</div>
                     </div>
                     <div class="result-item">
                         <div class="label">Total Pounds</div>
-                        <div class="value" id="totalPounds">0</div>
+                        <div class="value" id="totalPounds">0 lbs</div>
+                    </div>
+                    <div class="result-item">
+                        <div class="label">Approx. Volume per sq ft</div>
+                        <div class="value" id="volumePerSqFt">N/A</div>
+                    </div>
+                    <div class="result-item">
+                        <div class="label">Total Approx. Volume</div>
+                        <div class="value" id="totalVolume">0 cups</div>
                     </div>
                 </div>
+            </div>
+
+            <div class="warning-box">
+                <p><strong>⚠️ Important:</strong> Volume measurements (cups, tablespoons) are approximations based on typical bulk density. For accuracy, <strong>weigh your fertilizer</strong> using a kitchen scale. Different brands and moisture content can affect volume significantly.</p>
             </div>
 
             <div class="info-box">
                 <h4>💡 Pro Tips</h4>
                 <ul>
-                    <li><strong>ALWAYS - READ THE LABEL on fertilizer package</strong> Note the % N-P-K and follow all handling, storage and safety instructions</li>
-                    <li><strong>Measuring cups and spoons work great</strong> Label them - For Garden Use Only</li>
-                    <li><strong>Use a kitchen scale</strong> for amounts over 1 pound (Clean thoroughly after use)</li>
+                    <li><strong>⚠️ ALWAYS READ THE LABEL</strong> on your fertilizer package - Note the % N-P-K and follow all handling, storage, and safety instructions</li>
+                    <li><strong>Use a kitchen scale</strong> for the most accurate measurements (measures in ounces or grams)</li>
+                    <li><strong>Volume is approximate</strong> - same weight can have different volumes depending on fertilizer form</li>
                     <li><strong>Apply evenly</strong> by dividing your bed into sections</li>
                     <li><strong>Water after application</strong> to help nutrients reach roots</li>
                 </ul>
@@ -445,63 +473,128 @@
 
         <!-- Help Section -->
         <div class="help-section">
-            <h3>📖 How to Read Your Soil Test</h3>
-            <p>Your soil test will recommend application rates like "Apply 1.5 lbs/1000 ft² Nitrogen". Here's what to do:</p>
+            <h3>📖 Understanding the Calculator</h3>
+            <p>This calculator uses actual bulk density data to provide both weight and volume estimates. <strong>Weight measurements are always accurate</strong> - volume is an approximation that varies by product form and moisture content.</p>
             
             <div class="example-card">
-                <p><strong>Example Scenario:</strong></p>
+                <p><strong>Why bulk density matters:</strong></p>
+                <p>• 1 cup of feather meal weighs ~1.7 oz (light and fluffy)<br>
+                • 1 cup of rock phosphate weighs ~5.6 oz (dense and heavy)<br>
+                • Same cup, very different weights!</p>
+                <br>
+                <p><strong>Example Calculation:</strong></p>
                 <p>✓ Soil test says: "Apply 1.5 lbs/1000 ft² Nitrogen"<br>
-                ✓ You have: Blood meal fertilizer (13-0-0)<br>
+                ✓ You have: Blood meal fertilizer (13% N)<br>
                 ✓ Garden bed: 4 ft × 10 ft = 40 sq ft</p>
                 <br>
-                <p><strong>Enter in calculator:</strong></p>
-                <p>• Application Rate: <strong>1.5</strong> (lbs per 1000 ft²)<br>
-                • Fertilizer %: <strong>13</strong> (from the 13-0-0 rating)<br>
-                • Bed Size: <strong>40</strong> sq ft</p>
-                <br>
-                <p>✅ Result: Apply <strong>approximately 1 cup</strong> of blood meal to your 40 sq ft bed!</p>
+                <p>✅ Result: <strong>0.46 pounds (7.4 oz)</strong> of blood meal<br>
+                ≈ <strong>0.9 cups</strong> (approximate volume based on blood meal density)</p>
             </div>
 
-            <h3>🔢 Understanding Fertilizer Numbers</h3>
+            <h3>🔢 Fertilizer Numbers Explained</h3>
             <p>Fertilizer bags show three numbers like <strong>21-0-0</strong> or <strong>10-10-10</strong>:</p>
             <ul>
                 <li><strong>First number</strong> = Nitrogen (N) percentage</li>
-                <li><strong>Second number</strong> = Phosphorus (P) percentage</li>
-                <li><strong>Third number</strong> = Potassium (K) percentage</li>
-            </ul>
-            <p>Example: 21-0-0 means 21% Nitrogen. If applying nitrogen, enter <strong>21</strong> in the Fertilizer % field.</p>
-
-            <h3>🌾 Common Organic vs Synthetic Options</h3>
-            <p><strong>For Nitrogen:</strong></p>
-            <ul>
-                <li>Organic: Blood meal (13%), Feather meal (~10%), Fish emulsion (5%)</li>
-                <li>Synthetic: Ammonium sulfate (21%), Urea (~46%)</li>
-            </ul>
-            <p><strong>For Phosphorus:</strong></p>
-            <ul>
-                <li>Organic: Bone meal (15%), Rock phosphate (~3%)</li>
-                <li>Synthetic: Triple superphosphate (~45%)</li>
-            </ul>
-            <p><strong>For Potassium:</strong></p>
-            <ul>
-                <li>Organic: Lanbeinite - Sulfate of Potash (~22%)</li>
-                <li>Synthetic: Muriate of Potash (~60%)</li>
-            </ul>
-            <p><strong>For Sulfur:</strong></p>
-            <ul>
-                <li>Organic: Sulfur Fungicide - Elemental Sulfur (~90%)</li>
-                <li>(note: Microbes in the soil digest the sulfur and produce sulfuric acid which in turn lowers the pH. It is a relatively slow process.)</li>
-            </ul>
-            <p><strong>For Boron:</strong></p>
-            <ul>
-                <li>Organic: Borax - Sodium Borate (~11.4%)</li>
-                <li>(note: Using this will leave the sodium behind in the soil.)</li>
+                <li><strong>Second number</strong> = Phosphorus (P₂O₅) percentage</li>
+                <li><strong>Third number</strong> = Potassium (K₂O) percentage</li>
             </ul>
         </div>
     </div>
 
     <script>
         let currentUnit = 'per1000';
+        
+        // Fertilizer database with bulk densities (kg/m³) from Google Sheet
+        const fertilizerData = {
+            // Nitrogen sources
+            'blood_meal': { name: 'Blood Meal', pct: 13, nutrient: 'N', type: 'Organic', density: 615 },
+            'feather_meal': { name: 'Feather Meal', pct: 10, nutrient: 'N', type: 'Organic', density: 400 },
+            'ammonium_sulfate': { name: 'Ammonium Sulfate', pct: 21, nutrient: 'N', type: 'Synthetic', density: 1050 },
+            'urea': { name: 'Urea', pct: 46, nutrient: 'N', type: 'Synthetic', density: 750 },
+            'ammonium_nitrate': { name: 'Ammonium Nitrate', pct: 34, nutrient: 'N', type: 'Synthetic', density: 873 },
+            
+            // Phosphorus sources
+            'bone_meal': { name: 'Bone Meal', pct: 15, nutrient: 'P', type: 'Organic', density: 880 },
+            'rock_phosphate': { name: 'Rock Phosphate', pct: 3, nutrient: 'P', type: 'Organic', density: 1350 },
+            'triple_super_phosphate': { name: 'Super Triple Phosphate', pct: 45, nutrient: 'P', type: 'Synthetic', density: 1100 },
+            
+            // Potassium sources
+            'langbeinite': { name: 'Langbeinite (Sulfate of Potash)', pct: 22, nutrient: 'K', type: 'Organic', density: 1300 },
+            'muriate_potash': { name: 'Muriate of Potash', pct: 60, nutrient: 'K', type: 'Synthetic', density: 1060 },
+            
+            // Sulfur sources
+            'elemental_sulfur': { name: 'Elemental Sulfur', pct: 90, nutrient: 'S', type: 'Organic', density: 800 },
+            
+            // Boron sources
+            'borax': { name: 'Borax (Sodium Borate)', pct: 11.4, nutrient: 'B', type: 'Organic', density: 960 }
+        };
+        
+        let selectedFertilizer = null;
+
+        // Initialize fertilizer dropdown
+        function initializeFertilizerDropdown() {
+            filterFertilizers();
+        }
+
+        function filterFertilizers() {
+            const nutrientType = document.getElementById('nutrientType').value;
+            const select = document.getElementById('fertilizerSelect');
+            
+            // Clear existing options except the first one
+            select.innerHTML = '<option value="">-- Select a fertilizer --</option>';
+            
+            // Group by type
+            const organic = [];
+            const synthetic = [];
+            
+            for (const [key, fert] of Object.entries(fertilizerData)) {
+                if (nutrientType === 'all' || fert.nutrient === nutrientType) {
+                    const displayName = `${fert.name} (${fert.pct}% ${fert.nutrient})`;
+                    if (fert.type === 'Organic') {
+                        organic.push({ key, displayName });
+                    } else {
+                        synthetic.push({ key, displayName });
+                    }
+                }
+            }
+            
+            // Add organic group
+            if (organic.length > 0) {
+                const organicGroup = document.createElement('optgroup');
+                organicGroup.label = 'Organic Fertilizers';
+                organic.forEach(item => {
+                    const option = document.createElement('option');
+                    option.value = item.key;
+                    option.textContent = item.displayName;
+                    organicGroup.appendChild(option);
+                });
+                select.appendChild(organicGroup);
+            }
+            
+            // Add synthetic group
+            if (synthetic.length > 0) {
+                const syntheticGroup = document.createElement('optgroup');
+                syntheticGroup.label = 'Synthetic Fertilizers';
+                synthetic.forEach(item => {
+                    const option = document.createElement('option');
+                    option.value = item.key;
+                    option.textContent = item.displayName;
+                    syntheticGroup.appendChild(option);
+                });
+                select.appendChild(syntheticGroup);
+            }
+        }
+
+        function selectFertilizer() {
+            const key = document.getElementById('fertilizerSelect').value;
+            if (key && fertilizerData[key]) {
+                selectedFertilizer = fertilizerData[key];
+                document.getElementById('fertilizerPct').value = selectedFertilizer.pct;
+            } else {
+                selectedFertilizer = null;
+            }
+            calculate();
+        }
 
         function setUnit(unit) {
             currentUnit = unit;
@@ -512,22 +605,13 @@
             calculate();
         }
 
-        function setCommonProduct() {
-            const select = document.getElementById('commonProducts');
-            const value = select.value;
-            if (value && value !== '0') {
-                document.getElementById('fertilizerPct').value = value;
-                calculate();
-            }
-        }
-
         function calculate() {
             let appRate = parseFloat(document.getElementById('appRate').value) || 0;
             const fertilizerPct = parseFloat(document.getElementById('fertilizerPct').value) || 0;
             const bedSize = parseFloat(document.getElementById('bedSize').value) || 0;
 
             if (fertilizerPct === 0) {
-                showError("Please enter fertilizer percentage");
+                showError("Please select a fertilizer or enter percentage");
                 return;
             }
 
@@ -539,55 +623,84 @@
             // Update bed size display
             document.getElementById('bedSizeDisplay').textContent = bedSize;
 
-            // Calculate ounces per sq ft at 100%
+            // WEIGHT CALCULATIONS (always accurate)
             const poundsPerSqFt = appRate / 1000;
             const ouncesPerSqFt100 = poundsPerSqFt * 16;
-
-            // Adjust for actual fertilizer percentage
             const ouncesPerSqFt = ouncesPerSqFt100 * (100 / fertilizerPct);
-
-            // Calculate total for the bed
             const totalOunces = ouncesPerSqFt * bedSize;
             const totalPounds = totalOunces / 16;
-            const totalCups = totalOunces / 8;
-            const totalTablespoons = ouncesPerSqFt * bedSize * 2;
 
-            // Display per sq ft
-            if (ouncesPerSqFt < 1) {
-                const tablespoons = ouncesPerSqFt * 2;
-                document.getElementById('perSqFt').textContent = tablespoons.toFixed(1) + ' tbsp';
+            // Display weight results
+            document.getElementById('perSqFtRate').textContent = ouncesPerSqFt.toFixed(3) + ' oz/sq ft';
+            document.getElementById('perSqFtWeight').textContent = ouncesPerSqFt.toFixed(3) + ' oz';
+            document.getElementById('totalOunces').textContent = totalOunces.toFixed(2) + ' oz';
+            document.getElementById('totalPounds').textContent = totalPounds.toFixed(3) + ' lbs';
+
+            // Choose best main weight display
+            let mainWeight, mainWeightUnit;
+            if (totalPounds < 0.1) {
+                mainWeight = totalOunces.toFixed(2);
+                mainWeightUnit = 'ounces';
             } else {
-                document.getElementById('perSqFt').textContent = ouncesPerSqFt.toFixed(2) + ' oz';
+                mainWeight = totalPounds.toFixed(2);
+                mainWeightUnit = totalPounds === 1 ? 'pound' : 'pounds';
             }
 
-            // Display totals
-            document.getElementById('totalOunces').textContent = totalOunces.toFixed(1) + ' oz';
-            document.getElementById('totalTablespoons').textContent = Math.round(totalTablespoons) + ' tbsp';
-            document.getElementById('totalPounds').textContent = totalPounds.toFixed(2) + ' lbs';
+            document.getElementById('mainResultWeight').textContent = mainWeight;
+            document.getElementById('mainUnitWeight').textContent = mainWeightUnit;
 
-            // Choose best main display unit
-            let mainValue, mainUnit;
-            if (totalCups < 0.25) {
-                mainValue = (totalTablespoons).toFixed(1);
-                mainUnit = totalTablespoons === 1 ? 'tablespoon' : 'tablespoons';
-            } else if (totalCups < 1) {
-                mainValue = (totalOunces).toFixed(1);
-                mainUnit = 'ounces';
-            } else if (totalCups < 16) {
-                mainValue = totalCups.toFixed(2);
-                mainUnit = totalCups === 1 ? 'cup' : 'cups';
+            // VOLUME CALCULATIONS (approximate, based on bulk density)
+            let volumeText = '';
+            let volumePerSqFtText = '';
+            if (selectedFertilizer && selectedFertilizer.density) {
+                // Convert: kg/m³ → lbs/cup
+                // 1 m³ = 4226.75 cups
+                // density (kg/m³) × 2.20462 (lbs/kg) ÷ 4226.75 (cups/m³) = lbs/cup
+                const lbsPerCup = (selectedFertilizer.density * 2.20462) / 4226.75;
+                const totalCups = totalPounds / lbsPerCup;
+                const cupsPerSqFt = (ouncesPerSqFt / 16) / lbsPerCup;
+                
+                // Per square foot volume
+                if (cupsPerSqFt < 0.0625) { // Less than 1 tablespoon
+                    const tsp = cupsPerSqFt * 48;
+                    volumePerSqFtText = tsp.toFixed(2) + ' tsp';
+                } else if (cupsPerSqFt < 0.25) {
+                    const tbsp = cupsPerSqFt * 16;
+                    volumePerSqFtText = tbsp.toFixed(2) + ' tbsp';
+                } else {
+                    volumePerSqFtText = cupsPerSqFt.toFixed(3) + ' cups';
+                }
+                document.getElementById('volumePerSqFt').textContent = volumePerSqFtText;
+                
+                // Total volume
+                if (totalCups < 0.25) {
+                    const tablespoons = totalCups * 16;
+                    volumeText = `≈ ${tablespoons.toFixed(1)} tablespoons`;
+                    document.getElementById('totalVolume').textContent = tablespoons.toFixed(1) + ' tbsp';
+                } else if (totalCups < 1) {
+                    volumeText = `≈ ${totalCups.toFixed(2)} cups`;
+                    document.getElementById('totalVolume').textContent = totalCups.toFixed(2) + ' cups';
+                } else if (totalCups < 16) {
+                    volumeText = `≈ ${totalCups.toFixed(1)} cups`;
+                    document.getElementById('totalVolume').textContent = totalCups.toFixed(1) + ' cups';
+                } else {
+                    const quarts = totalCups / 4;
+                    volumeText = `≈ ${quarts.toFixed(1)} quarts`;
+                    document.getElementById('totalVolume').textContent = quarts.toFixed(1) + ' qts';
+                }
+                
+                document.getElementById('volumeEstimate').textContent = volumeText + ' (approximate)';
             } else {
-                mainValue = totalPounds.toFixed(1);
-                mainUnit = totalPounds === 1 ? 'pound' : 'pounds';
+                document.getElementById('volumeEstimate').textContent = 'Select a fertilizer to see volume estimate';
+                document.getElementById('totalVolume').textContent = 'N/A';
+                document.getElementById('volumePerSqFt').textContent = 'N/A';
             }
-
-            document.getElementById('mainResult').textContent = mainValue;
-            document.getElementById('mainUnit').textContent = mainUnit;
         }
 
         function showError(message) {
-            document.getElementById('mainResult').textContent = '⚠️';
-            document.getElementById('mainUnit').textContent = message;
+            document.getElementById('mainResultWeight').textContent = '⚠️';
+            document.getElementById('mainUnitWeight').textContent = message;
+            document.getElementById('volumeEstimate').textContent = '';
         }
 
         function calculateBedSize() {
@@ -606,8 +719,11 @@
         document.getElementById('bedLength').addEventListener('input', calculateBedSize);
         document.getElementById('bedWidth').addEventListener('input', calculateBedSize);
 
-        // Initial calculation
-        calculate();
+        // Initialize on load
+        window.addEventListener('load', () => {
+            initializeFertilizerDropdown();
+            calculate();
+        });
     </script>
 </body>
 </html>
