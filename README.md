@@ -37,7 +37,7 @@ Includes both organic and synthetic options:
 ## 🚀 How to Use
 
 ### Online (When Hosted)
-Visit: **[https://YOUR-USERNAME.github.io/fertilizer-calculator/](https://YOUR-USERNAME.github.io/fertilizer-calculator/)**
+Visit: **[https://YOUR-USERNAME.github.io/fertilizer-calculator/](https://fertilizer-calculator.github.io/fertilizer-calculator/)**
 
 ### Offline
 1. Download `index.html` (or `fertilizer-calculator-v2.html`)
