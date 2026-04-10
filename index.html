@@ -394,6 +394,17 @@
                 </div>
             </div>
 
+            <div class="input-row">
+                <div class="input-group">
+                    <label>Custom Bulk Density (optional)</label>
+                    <input type="number" id="customBulkDensity" value="" step="1" min="0" placeholder="kg/m³">
+                    <div class="helper-text">Enter bulk density in kg/m³ for volume estimates (leave blank to use default)</div>
+                </div>
+                <div class="input-group">
+                    <!-- Empty div for grid alignment -->
+                </div>
+            </div>
+
             <!-- Step 3 -->
             <div class="step-header">
                 <div class="step-number">3</div>
@@ -499,6 +510,38 @@
                 <li><strong>First number</strong> = Nitrogen (N) percentage</li>
                 <li><strong>Second number</strong> = Phosphorus (P₂O₅) percentage</li>
                 <li><strong>Third number</strong> = Potassium (K₂O) percentage</li>
+            </ul>
+
+            <h3>🌾 Common Organic vs Synthetic Options</h3>
+            
+            <p><strong>For Nitrogen:</strong></p>
+            <ul>
+                <li><strong>Organic:</strong> Blood meal (13%), Feather meal (~10%)</li>
+                <li><strong>Synthetic:</strong> Ammonium sulfate (21%), Urea (~46%)</li>
+            </ul>
+            
+            <p><strong>For Phosphorus:</strong></p>
+            <ul>
+                <li><strong>Organic:</strong> Bone meal (15%), Rock phosphate (~3%)</li>
+                <li><strong>Synthetic:</strong> Triple superphosphate (~45%)</li>
+            </ul>
+            
+            <p><strong>For Potassium:</strong></p>
+            <ul>
+                <li><strong>Organic:</strong> Langbeinite - Sulfate of Potash (~22%)</li>
+                <li><strong>Synthetic:</strong> Muriate of Potash (~60%)</li>
+            </ul>
+            
+            <p><strong>For Sulfur:</strong></p>
+            <ul>
+                <li><strong>Organic:</strong> Sulfur Fungicide - Elemental Sulfur (~90%)</li>
+                <li style="list-style: none; margin-left: -20px; color: #666; font-style: italic;">(note: Microbes in the soil digest the sulfur and produce sulfuric acid which in turn lowers the pH. It is a relatively slow process.)</li>
+            </ul>
+            
+            <p><strong>For Boron:</strong></p>
+            <ul>
+                <li><strong>Organic:</strong> Borax - Sodium Borate (~11.4%)</li>
+                <li style="list-style: none; margin-left: -20px; color: #666; font-style: italic;">(note: Using this will leave the sodium behind in the soil.)</li>
             </ul>
         </div>
     </div>
@@ -654,11 +697,16 @@
             // VOLUME CALCULATIONS (approximate, based on bulk density)
             let volumeText = '';
             let volumePerSqFtText = '';
-            if (selectedFertilizer && selectedFertilizer.density) {
+            
+            // Use custom bulk density if provided, otherwise use fertilizer's density
+            const customDensity = parseFloat(document.getElementById('customBulkDensity').value);
+            const bulkDensity = customDensity || (selectedFertilizer ? selectedFertilizer.density : null);
+            
+            if (bulkDensity) {
                 // Convert: kg/m³ → lbs/cup
                 // 1 m³ = 4226.75 cups
                 // density (kg/m³) × 2.20462 (lbs/kg) ÷ 4226.75 (cups/m³) = lbs/cup
-                const lbsPerCup = (selectedFertilizer.density * 2.20462) / 4226.75;
+                const lbsPerCup = (bulkDensity * 2.20462) / 4226.75;
                 const totalCups = totalPounds / lbsPerCup;
                 const cupsPerSqFt = (ouncesPerSqFt / 16) / lbsPerCup;
                 
@@ -720,6 +768,7 @@
         document.getElementById('bedSize').addEventListener('input', calculate);
         document.getElementById('bedLength').addEventListener('input', calculateBedSize);
         document.getElementById('bedWidth').addEventListener('input', calculateBedSize);
+        document.getElementById('customBulkDensity').addEventListener('input', calculate);
 
         // Initialize on load
         window.addEventListener('load', () => {
